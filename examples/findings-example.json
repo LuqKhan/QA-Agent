@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "verdict": "incomplete",
+  "run_date": "2026-07-10",
+  "app": "https://dev.example.com/",
+  "requirements": [
+    {
+      "id": "R1",
+      "req": "Countdown resets when a reminder is edited",
+      "status": "broken",
+      "evidence_type": "direct",
+      "expected": "Timer restarts from the full interval after saving an edit",
+      "actual": "Timer keeps the original deadline",
+      "repro": [
+        "Open /surveys/123/reminders",
+        "Edit reminder #2 and save",
+        "Observe the countdown value"
+      ],
+      "evidence": "Countdown read 22:14:03 before the edit and 22:13:41 after — no reset."
+    },
+    {
+      "id": "R2",
+      "req": "Resend button disabled while a countdown is active",
+      "status": "missing",
+      "evidence_type": "direct",
+      "note": "No disabled state or handler exists anywhere in the reminder row; ticket acceptance criterion #4."
+    },
+    {
+      "id": "R3",
+      "req": "Reminder email actually sends when the countdown expires",
+      "status": "untestable",
+      "evidence_type": "proxy",
+      "note": "Expiry is hours away and the dev environment has no outbound mail; a follow-up run can check the message history."
+    },
+    {
+      "id": "R4",
+      "req": "Editing one reminder does not affect other reminders' countdowns",
+      "status": "verified",
+      "evidence_type": "direct",
+      "evidence": "Reminder #1 countdown unchanged (18:02:11 → 18:01:47, normal decay) across the R1 edit."
+    }
+  ],
+  "ambiguities": [
+    "Ticket doesn't say what happens to an in-flight countdown when the reminder's interval is shortened below time already elapsed — reset, fire immediately, or clamp?"
+  ],
+  "untested_env_gaps": [
+    "Outbound email delivery (no SMTP in dev)."
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "name": "andon",
+  "owner": {
+    "name": "Luqmaan Khan"
+  },
+  "plugins": [
+    {
+      "name": "andon",
+      "source": "./",
+      "description": "Independent black-box QA agent for the dev loop. Pull the cord: /qa <ticket> verifies the running app against intent and hands back a machine-consumable defect checklist."
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "name": "andon",
+  "description": "Independent black-box QA agent for the dev loop — verifies your running app against the ticket's intent and returns a verified/broken/missing/untestable checklist the coding agent can fix against.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Luqmaan Khan"
+  }
+}
