@@ -1,5 +1,5 @@
 ---
-description: Andon — independent black-box QA of the running app against a ticket/intent. Spawns a fresh verification agent that drives the UI + public API and returns a verified/broken/missing/untestable checklist, then fixes against it.
+description: Independent black-box QA of the running app against a ticket/intent. Spawns a fresh verification agent that drives the UI + public API and returns a verified/broken/missing/untestable checklist, then fixes against it.
 argument-hint: "<ticket-id | intent text> [entry URL]"
 ---
 
@@ -31,7 +31,7 @@ Run an independent QA pass on the current feature, in whatever project this sess
   if it can't beat the user checking by hand, it has no reason to exist.
 
 ## Execution engine — scripts first, LLM last
-Andon ships a deterministic runner (`runner/` in the plugin: `attach.js`, `check.js`,
+This plugin ships a deterministic runner (`runner/` in the plugin: `attach.js`, `check.js`,
 `crawl.js`, `recipe-template.js`) that attaches to the user's real Chrome over CDP and
 executes checks at machine speed. An LLM deliberating before every click costs 5-10 seconds a
 step; a script costs milliseconds. So for ANY check, use the cheapest sufficient executor,
@@ -59,7 +59,7 @@ is unavailable, fall back to the interactive browser tools and tell the user the
 relaunch that makes runs ~10x faster. Record the runner's resolved path in the ui-map README.
 
 ## 0. Project knowledge base (cold start)
-Andon keeps per-project navigation memory in `.claude/qa/ui-map/`: area files (routes,
+The plugin keeps per-project navigation memory in `.claude/qa/ui-map/`: area files (routes,
 selectors, quirks), `recipes.md` (verified, replayable probes and seeding procedures), and a
 `README.md` with conventions — mechanics only, never expected behavior, never credentials.
 
@@ -70,7 +70,7 @@ questions before anything else, then write the answers into the ui-map README yo
    to, or a session the user will establish before each run)? The verifier never enters
    credentials.
 3. Will you describe what to test right in the prompt (the default — most teams do this), or
-   is there also a tickets directory / issue tracker Andon should read when you pass an ID?
+   is there also a tickets directory / issue tracker to read when you pass an ID?
 
 Then, still at cold start: **offer to write the recommended permission rules into the
 project's `.claude/settings.local.json`** (merge with existing settings, never replace) —
@@ -91,8 +91,12 @@ the README whichever they chose.
 - **Intent (ground truth):** most users simply write what they want tested —
   `/qa "saving a valid NPI should clear the missing-NPI banner"` — and that text IS the
   intent. Treat `$ARGUMENTS` as a ticket ID only when it looks like one AND the project has a
-  configured ticket source (step 0). If there's neither a description nor a ticket, ask —
-  never reconstruct intent from the diff; that inherits the author's misreading.
+  configured ticket source (step 0). Resolve an ID in this order: (1) the project's local
+  tickets directory if one was named at cold start; (2) an issue-tracker MCP connector if one
+  is available in the session (Jira, Linear, ...); (3) `gh issue view <n>` when the repo uses
+  GitHub issues. If none of these can produce the ticket, say so plainly and ask the user to
+  paste the ticket text — never guess at its contents. If there's neither a description nor a
+  ticket, ask — never reconstruct intent from the diff; that inherits the author's misreading.
 - **Scope discipline for freehand intent:** a one-line description yields a small checklist —
   the stated behavior, its inverse, and directly implied edge cases. Never inflate a sentence
   into an invented spec; open questions go under `ambiguities`.
@@ -108,7 +112,7 @@ the README whichever they chose.
   a record, sending anything — needs the user's explicit OK for that specific action, and
   everything mutated must be restored before the run ends. Prefer dev/staging when one exists.
 - **Permissions check (every run, not just cold start):** confirm the project's
-  `.claude/settings.local.json` has Andon's allow rules (browser-tool server, curl/jq,
+  `.claude/settings.local.json` has the plugin's allow rules (browser-tool server, curl/jq,
   `.claude/qa/**` writes); if missing, offer once to write them before spawning the verifier.
 - **Output path:** `.claude/qa/runs/<branch>-<yyyymmdd-HHMM>.json`
 

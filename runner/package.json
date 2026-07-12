@@ -1,8 +1,8 @@
 {
-  "name": "andon-runner",
+  "name": "qa-agent-runner",
   "private": true,
   "version": "0.2.0",
-  "description": "Deterministic executor for Andon QA checks — attaches to your real Chrome over CDP so checks run at machine speed with your logged-in session.",
+  "description": "Deterministic executor for QA checks — attaches to your real Chrome over CDP so checks run at machine speed with your logged-in session.",
   "engines": {
     "node": ">=18"
   },
