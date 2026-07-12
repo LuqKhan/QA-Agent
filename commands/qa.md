@@ -29,7 +29,7 @@ Run an independent QA pass on the current feature, in whatever project this sess
   the lag to a moment nobody's waiting on an answer.
 - **Full** (default): ticket-level verification — full checklist, findings JSON, ui-map update.
 - **Quick** (`/qa quick <assertion>`): a one-assertion smoke check ("does the banner show when
-  the NPI is set?"). The assertion IS the checklist — do not derive more requirements.
+  the profile is complete?"). The assertion IS the checklist — do not derive more requirements.
   Preflight shrinks to reachable + authenticated (skip build-stamp/canary unless the user
   supplied one). Output: verdict + the one finding, written as a one-requirement findings JSON
   (same schema). Touch the ui-map only if genuinely new mechanics were learned. Spawn the
@@ -88,7 +88,9 @@ declines, proceed and let them feel the prompts.
 **Team-shared maps (optional):** the ui-map can be a git repository of its own. At setup, ask
 whether the team has a shared map repo (any private git URL — the team's, never the plugin's
 public repo). If yes: clone it AS `.claude/qa/ui-map/`, and make sure the enclosing project
-gitignores `.claude/qa/` so the nested repo doesn't confuse the app repo. Then, every run:
+gitignores `.claude/qa/` so the nested repo doesn't confuse the app repo. If the map repo is
+brand new and empty, push an initial commit first so its default branch exists — cloning a
+branchless repo yields a confusing empty checkout. Then, every run:
 `git pull --rebase` in the map before preflight; after a run that changed the map, commit with
 a one-line message and push (at setup, ask once whether pushes happen automatically or are
 offered each time). On a merge conflict, take the remote version and re-apply this run's
@@ -106,7 +108,7 @@ the README whichever they chose.
 
 ## 1. Assemble the QA brief
 - **Intent (ground truth):** most users simply write what they want tested —
-  `/qa "saving a valid NPI should clear the missing-NPI banner"` — and that text IS the
+  `/qa "completing the profile should clear the setup banner"` — and that text IS the
   intent. Treat `$ARGUMENTS` as a ticket ID only when it looks like one AND the project has a
   configured ticket source (step 0). Resolve an ID in this order: (1) the project's local
   tickets directory if one was named at cold start; (2) an issue-tracker MCP connector if one

@@ -32,10 +32,10 @@ function parseArgs(argv) {
   try {
     // --- steps (replace with the verified flow) ------------------------
     // await page.goto(args.url, { waitUntil: 'domcontentloaded' });
-    // await page.locator('#settings-npi').fill(args.npi);
+    // await page.locator('#settings-field').fill(args.value);
     // await page.locator('button:has-text("Save")').click();
     // await page.waitForTimeout(1000);
-    // const banner = page.locator('.banner-npi');
+    // const banner = page.locator('.setup-banner');
     // const present = await banner.first().isVisible().catch(() => false);
     // -------------------------------------------------------------------
     const present = false; // replace
