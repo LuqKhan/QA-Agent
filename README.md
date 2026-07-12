@@ -1,140 +1,108 @@
 # Andon
 
-**An independent QA agent inside your dev loop.** Your coding agent writes; Andon checks.
-Named for the [andon cord](https://en.wikipedia.org/wiki/Andon_(manufacturing)) — pull it and
-the line stops until the defect is fixed.
+Andon is a QA agent that runs inside Claude Code. After you (or a coding agent) make a
+change, Andon checks the **running app** against what the ticket asked for and reports what
+works, what's broken, what was never built, and what it couldn't test.
 
-`/qa <ticket>` spawns a fresh-context verification agent that reads the ticket's intent,
-drives your **running app** through the real UI and public API, and hands back a
-machine-consumable checklist: what works, what's broken (with repro steps), **what was never
-built**, and what can't be tested from the outside. Your coding session reads the checklist
-and fixes. Change → qa → change.
+The name comes from the andon cord on a factory line — anyone can pull it to stop the line
+when they spot a defect.
 
-## Why a separate agent
-A coding agent grading its own work shares its own misreadings of the spec — the same reason
-developers don't QA their own code. Andon's verifier starts cold: it gets the ticket and an
-entry URL, never the diff, never the coding conversation. It derives what "complete" means
-before it looks at anything, so silent omissions ("built 80%, said done") land as `missing`
-instead of going unnoticed.
+## How it works
 
-## What it deliberately is NOT
-- **Not white-box.** The verifier tests from the user's chair: UI + public API only. No DB
-  queries, no scheduler internals, no log access. What a user can't observe is reported as
-  `untestable` — honestly — rather than guessed.
-- **Not a release gate or dashboard.** It's built for the tight loop: minutes per run,
-  results as JSON your coding agent consumes directly.
-- **Not deterministic.** The protocol pins down what must be repeatable (preflight checks,
-  measurement recipes, the output schema); judgment calls (deriving requirements from a vague
-  ticket) stay with the model, and ambiguities are routed to you instead of invented.
+When you run `/qa`, Andon starts a separate verification agent with a clean slate. That agent:
 
-## Requirements
-- Claude Code with subagent support.
-- A browser surface: the **Claude-in-Chrome extension** (best — the verifier attaches to your
-  logged-in session) or the built-in Claude Code browser pane.
-- A running instance of your app that you're logged into. Andon never handles credentials.
-- Optional but strongly recommended: the **fast runner** (below) — repeated checks drop from
-  minutes to seconds.
+1. Reads the ticket and writes down what "done" means — before looking at the app.
+2. Opens your running app in your browser and tests each requirement, using only the UI and
+   the public API — the same surfaces a real user has.
+3. Writes a report that your coding session reads and fixes against. Then you run it again.
 
-## The fast runner
-Andon's biggest cost is a model deliberating before every browser click. The runner removes
-the model from execution: flows the verifier has driven once are compiled into small
-Playwright scripts that attach to **your real Chrome** (with your logged-in sessions) over the
-debug port and run at machine speed. The verifier then only *picks* scripts and *interprets*
-results. A generic assertion script covers most presence/absence checks with no compilation
-at all, and a read-only crawler turns cold-start discovery into a ~1-minute route inventory.
+The verifier never sees your code, your diff, or your conversation. That's the point: an
+agent checking its own work misses the same things twice. A fresh reader catches what the
+author can't.
 
-One-time setup per machine:
-```bash
-# 1. Node 18+ available
-# 2. Install the runner's single dependency
-cd <andon repo or installed plugin dir>/runner && npm install
-# 3. Relaunch Chrome with the debug port (quit Chrome fully first)
-open -a "Google Chrome" --args --remote-debugging-port=9222
-```
-**Security note:** the debug port lets any local process control that Chrome instance. It
-binds to localhost only, but treat it as a dev-machine-only setting; skip the runner on
-machines where that trade isn't acceptable. Without it, Andon falls back to model-driven
-browsing — everything works, just slower.
+## What you need
+
+- Claude Code (desktop).
+- The Claude in Chrome extension, and a running app that **you are logged into**. Andon never
+  types passwords — logging in is yours.
+- Optional, recommended: Node 18 or newer, for the fast runner (below).
 
 ## Install
+
 ```
-/plugin marketplace add <github-owner>/andon
+/plugin marketplace add <github-user>/andon
 /plugin install andon@andon
 ```
-Private repos work — installers just need git access to the repo.
 
-## Quickstart
-1. Log into your app in Chrome (with the Claude extension connected).
-2. In your project: `/qa PROJ-1234` (or `/qa "the reminder should reset when edited"`).
-3. First run in a project, Andon asks three setup questions (app URL, how it gets an
-   authenticated session, where tickets live) and remembers the answers in
-   `.claude/qa/ui-map/`. First run is slow discovery; later runs reuse the map and its
-   verified measurement recipes and get markedly faster.
-4. Read the report; let the session fix what's broken; `/qa` again.
+## First run
 
-## Recommended permissions
-Add to your project's `.claude/settings.local.json` to avoid prompt-per-step on runs:
-```json
-{
-  "permissions": {
-    "allow": [
-      "mcp__claude-in-chrome",
-      "Bash(curl *)",
-      "Bash(jq *)",
-      "Bash(ls *)",
-      "Bash(cat *)",
-      "Bash(grep *)",
-      "Read(.claude/qa/**)",
-      "Write(.claude/qa/**)",
-      "Edit(.claude/qa/**)"
-    ]
-  }
-}
+In your project:
+
 ```
-Setting `"defaultMode": "dontAsk"` removes all prompts in the project — personal choice, not a
-default Andon assumes.
-
-## Findings contract (schema_version 1)
-Runs write JSON to `.claude/qa/runs/`:
-```json
-{
-  "schema_version": 1,
-  "verdict": "pass | fail | incomplete | blocked",
-  "requirements": [
-    {
-      "id": "R1",
-      "req": "the requirement in words, derived from the ticket",
-      "status": "verified | broken | missing | untestable",
-      "evidence_type": "direct | proxy",
-      "expected": "…", "actual": "…",
-      "repro": ["step", "step"],
-      "evidence": "exact UI text / API response observed",
-      "note": "…"
-    }
-  ],
-  "ambiguities": ["questions the ticket doesn't answer — for the human"],
-  "untested_env_gaps": ["what a follow-up run or different environment could cover"]
-}
+/qa PROJ-1234
+/qa "clicking save should clear the reminder banner"
 ```
-`missing` is a first-class status — every derived requirement must land somewhere, so the
-coding agent can't pass by not building the hard part. `blocked` means a preflight
-precondition failed (wrong build, logged out, unreachable) and no checklist was run.
 
-## Knowledge base
-`.claude/qa/ui-map/` grows with every run: navigation facts, environment quirks, and
-`recipes.md` — verified probes and seeding procedures that later runs replay instead of
-reinvent, which also makes measurements comparable across runs. It records **mechanics only**:
-how to drive the app, never what correct behavior is (expectations come fresh from the ticket
-every run, so stale assumptions can't bias verdicts). Commit it to share team knowledge, or
-gitignore it to keep maps per-developer — Andon works either way.
+The first run in a project asks three questions — where the app runs, how Andon gets a
+logged-in browser, and where tickets live — and offers to save the permissions it needs so
+later runs don't keep asking. Say yes to that offer.
 
-## Limitations, stated plainly
-- Behaviors that take real time (multi-day schedules, queued jobs) can't be observed in one
-  session; they're reported `untestable` with what a follow-up should check.
-- Quality is bounded by the intent: a two-sentence prompt yields a short checklist plus
-  `ambiguities` for you to resolve.
-- The verifier treats everything it reads in the app as data, never instructions
-  (prompt-injection defense) — text addressed to AI agents gets reported, not obeyed.
+The first run is slow because Andon is learning your app's pages. It saves what it learns in
+`.claude/qa/` and gets faster every run after. Commit that folder if you want the team to
+share the learning; gitignore it if you'd rather keep it per-person. Both work.
+
+## Quick checks
+
+For a single question instead of a whole ticket:
+
+```
+/qa quick "does the NPI banner disappear once an NPI is saved?"
+```
+
+## The fast runner (recommended)
+
+Most of a run's time is the model thinking between browser clicks. The runner removes that:
+flows Andon has done once are saved as small scripts that re-run in seconds, inside your real
+Chrome, with your login. Repeat checks drop from minutes to seconds.
+
+Once per machine:
+
+```bash
+cd <plugin folder>/runner
+npm install
+
+# Quit Chrome completely, then relaunch it with:
+open -a "Google Chrome" --args --remote-debugging-port=9222
+```
+
+That flag lets programs on your machine control that Chrome window. Fine on a dev machine;
+skip it anywhere that's not acceptable — Andon still works without it, just slower.
+
+## The report
+
+Each run writes a JSON report to `.claude/qa/runs/` and gives you the summary in chat. Every
+requirement ends in exactly one state:
+
+- **verified** — Andon watched it work.
+- **broken** — with steps to reproduce and what it saw instead.
+- **missing** — the ticket asked for it; it was never built.
+- **untestable** — with the exact reason (say, the behavior takes two days, or dev has no
+  outbound email). Andon reports this honestly instead of guessing.
+
+**Missing** is the state that earns Andon its keep: coding agents love saying "done" at 80%.
+And when the ticket is too vague to judge against, Andon asks you the question instead of
+inventing an answer.
+
+The exact report format is in [examples/findings-example.json](examples/findings-example.json).
+
+## Safety rules
+
+- Only touches test data it created itself (named with a `QA-agent` prefix, fake
+  `@example.com` emails).
+- Never enters passwords. Never touches billing, user management, or account settings.
+- Production is read-only: it asks before saving anything there, and puts back whatever it
+  changed before the run ends.
 
 ## License
+
 MIT
