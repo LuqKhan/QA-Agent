@@ -28,7 +28,7 @@ author can't.
 ## Install
 
 ```
-/plugin marketplace add <github-user>/qa-agent
+/plugin marketplace add LuqKhan/QA-Agent
 /plugin install qa-agent@qa-agent
 ```
 
@@ -57,7 +57,7 @@ share the learning; gitignore it if you'd rather keep it per-person. Both work.
 For a single question instead of a whole ticket:
 
 ```
-/qa quick "does the NPI banner disappear once an NPI is saved?"
+/qa quick "does the setup banner disappear once the profile is completed?"
 ```
 
 ## The fast runner (recommended)
@@ -69,7 +69,8 @@ real Chrome, with your login. Repeat checks drop from minutes to seconds.
 Once per machine:
 
 ```bash
-cd <plugin folder>/runner
+# the installed plugin lives under ~/.claude/plugins/cache/qa-agent/qa-agent/<version>/
+cd ~/.claude/plugins/cache/qa-agent/qa-agent/*/runner
 npm install
 
 # Quit Chrome completely, then relaunch it with:
