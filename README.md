@@ -7,7 +7,7 @@ couldn't test.
 ![Demo: the agent testing a fix by itself](media/demo.gif)
 
 *The agent testing a fix by itself. It types an invalid NPI and saves. The old build
-accepted it silently. This one rejects it. No one is touching the browser.*
+accepted it silently. This one rejects it.*
 
 ## How it works
 
