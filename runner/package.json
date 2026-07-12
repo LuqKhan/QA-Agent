@@ -1,0 +1,12 @@
+{
+  "name": "andon-runner",
+  "private": true,
+  "version": "0.2.0",
+  "description": "Deterministic executor for Andon QA checks — attaches to your real Chrome over CDP so checks run at machine speed with your logged-in session.",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "playwright-core": "^1.45.0"
+  }
+}

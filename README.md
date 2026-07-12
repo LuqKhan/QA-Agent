@@ -32,6 +32,29 @@ instead of going unnoticed.
 - A browser surface: the **Claude-in-Chrome extension** (best — the verifier attaches to your
   logged-in session) or the built-in Claude Code browser pane.
 - A running instance of your app that you're logged into. Andon never handles credentials.
+- Optional but strongly recommended: the **fast runner** (below) — repeated checks drop from
+  minutes to seconds.
+
+## The fast runner
+Andon's biggest cost is a model deliberating before every browser click. The runner removes
+the model from execution: flows the verifier has driven once are compiled into small
+Playwright scripts that attach to **your real Chrome** (with your logged-in sessions) over the
+debug port and run at machine speed. The verifier then only *picks* scripts and *interprets*
+results. A generic assertion script covers most presence/absence checks with no compilation
+at all, and a read-only crawler turns cold-start discovery into a ~1-minute route inventory.
+
+One-time setup per machine:
+```bash
+# 1. Node 18+ available
+# 2. Install the runner's single dependency
+cd <andon repo or installed plugin dir>/runner && npm install
+# 3. Relaunch Chrome with the debug port (quit Chrome fully first)
+open -a "Google Chrome" --args --remote-debugging-port=9222
+```
+**Security note:** the debug port lets any local process control that Chrome instance. It
+binds to localhost only, but treat it as a dev-machine-only setting; skip the runner on
+machines where that trade isn't acceptable. Without it, Andon falls back to model-driven
+browsing — everything works, just slower.
 
 ## Install
 ```
