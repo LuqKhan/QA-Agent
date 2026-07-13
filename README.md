@@ -2,10 +2,6 @@
 
 **Andon tests what your coding agent built, in your browser.**
 
-Your coding agent says done. This checks whether that's true. A fresh agent with a clean
-slate reads what you asked for, drives your app, and reports back: what works,
-what's broken, what never got built, and what it couldn't test.
-
 Works as a Claude Code plugin. Tests any web app you can open in Chrome.
 
 ![Demo: the agent testing a fix by itself](media/demo.gif)
