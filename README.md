@@ -1,6 +1,6 @@
-# qa-agent
+# Andon
 
-**qa-agent tests what your coding agent built, in your browser.**
+**Andon tests what your coding agent built, in your browser.**
 
 Your coding agent says done. This checks whether that's true. A fresh agent with a clean
 slate reads what you asked for, drives your app, and reports back: what works,
