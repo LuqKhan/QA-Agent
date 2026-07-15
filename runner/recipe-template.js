@@ -12,7 +12,7 @@
 // - On failure, include enough evidence (sample text, final_url, screenshot)
 //   for the verifier to decide: real defect vs. selector drift (then it
 //   re-drives the flow manually and repairs this script).
-const { attach } = require(process.env.QA_AGENT_RUNNER ? process.env.QA_AGENT_RUNNER + '/attach' : '../../../runner/attach');
+const { attach } = require(process.env.ANDON_RUNNER ? process.env.ANDON_RUNNER + '/attach' : '../../../runner/attach');
 
 function parseArgs(argv) {
   const args = {};

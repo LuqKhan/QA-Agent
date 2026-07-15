@@ -4,7 +4,7 @@
 // so scripts stay black-box: they see exactly what the user's browser renders.
 const { chromium } = require('playwright-core');
 
-const PORT = process.env.QA_AGENT_CDP_PORT || '9222';
+const PORT = process.env.ANDON_CDP_PORT || '9222';
 
 async function attach() {
   let browser;

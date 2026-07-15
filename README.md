@@ -15,8 +15,8 @@ accepted it silently. This one rejects it.*
 
 1. Install:
 ```
-/plugin marketplace add LuqKhan/QA-Agent
-/plugin install qa-agent@qa-agent
+/plugin marketplace add LuqKhan/Andon
+/plugin install andon@andon
 ```
 
 2. Log into your app in Chrome, then run `/qa setup` in your project. It asks three
@@ -43,7 +43,7 @@ a script. The same check later runs in seconds, in your real Chrome, with your l
 Once per machine (needs Node 18+):
 
 ```bash
-cd ~/.claude/plugins/cache/qa-agent/qa-agent/*/runner
+cd ~/.claude/plugins/cache/andon/andon/*/runner
 npm install
 
 # Quit Chrome completely, then relaunch it with:

@@ -1,11 +1,11 @@
 {
-  "name": "qa-agent",
+  "name": "andon",
   "owner": {
     "name": "Luqmaan Khan"
   },
   "plugins": [
     {
-      "name": "qa-agent",
+      "name": "andon",
       "source": "./",
       "description": "Adds a /qa command: an independent QA agent tests your running app against what you asked to be built and reports what works, what's broken, what's missing, and what it couldn't test."
     }

@@ -1,5 +1,5 @@
 {
-  "name": "qa-agent-runner",
+  "name": "andon-runner",
   "private": true,
   "version": "0.2.0",
   "description": "Deterministic executor for QA checks — attaches to your real Chrome over CDP so checks run at machine speed with your logged-in session.",
